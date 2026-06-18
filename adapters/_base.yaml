@@ -1,0 +1,10 @@
+# 所有 agent 共用的配置
+skill_file: SKILL.md
+required_fields:
+  - name
+  - description
+optional_fields:
+  - version
+  - author
+  - category
+symlink_mode: true

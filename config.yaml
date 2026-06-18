@@ -1,0 +1,3 @@
+# SkillOnce 配置
+# skill_dir: skill 存储路径
+skill_dir: ~/.agents/.mySkillRepository

@@ -1,0 +1,6 @@
+# claude-code adapter - 自动生成
+name: claude-code
+path: /Users/xiniu/.claude/skills
+supports_symlink: true
+notes: |
+  自动检测于 2026-06-19

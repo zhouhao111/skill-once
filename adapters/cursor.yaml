@@ -1,0 +1,8 @@
+# cursor adapter - 自动生成
+name: cursor
+path: /Users/xiniu/.cursor/skills
+supports_symlink: true
+builtin_paths:
+  - /Users/xiniu/.cursor/skills-cursor
+notes: |
+  自动检测于 2026-06-19
