@@ -54,9 +54,20 @@ description: |
 1. 删除 `<skill_dir>/<name>/` 目录
 2. 运行清理：`bash ~/.agents/skill-once/scripts/remove.sh <name>`
 
-### 规则 6：同步机制
+### 规则 6：拉取模式（推荐）
 
-所有变更后运行 sync 脚本，它会：
+当用户要求使用某个 skill 时：
+
+1. 检查 skill 是否在仓库中：`ls ~/.agents/.mySkillRepository/<skill-name>`
+2. 如果存在但本地没有 symlink，自动拉取：
+   ```bash
+   bash ~/.agents/skill-once/scripts/pull.sh <skill-name>
+   ```
+3. 然后执行 skill
+
+### 规则 7：推送模式（批量同步）
+
+所有变更后可运行 sync 脚本，批量同步所有 skill：
 - 读取 config.yaml 获取 skill_dir
 - 遍历 skill_dir 下所有 skill
 - 为每个 agent 目录创建 symlink
@@ -74,7 +85,10 @@ bash ~/.agents/skill-once/scripts/detect.sh
 # 根据检测结果自动生成 adapter 配置
 bash ~/.agents/skill-once/scripts/gen-config.sh
 
-# 同步所有 skill
+# 拉取单个 skill（推荐）
+bash ~/.agents/skill-once/scripts/pull.sh <skill-name>
+
+# 同步所有 skill（批量）
 bash ~/.agents/skill-once/scripts/sync.sh
 
 # 添加单个 skill
