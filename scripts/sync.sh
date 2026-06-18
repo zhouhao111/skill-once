@@ -1,5 +1,5 @@
 #!/bin/bash
-# 同步 skill（只同步已安装 SkillOnce 的 Agent）
+# 同步 skill（支持交互式选择 Agent）
 
 SKILL_ONCE="$HOME/.agents/skill-once"
 CONFIG="$SKILL_ONCE/config.yaml"
@@ -18,69 +18,9 @@ is_installed() {
     [ -L "$agent_path/skill-once" ] || [ -d "$agent_path/skill-once" ]
 }
 
-SYNCED=0
-SKIPPED=0
-PULLED=0
-
-echo "🔄 同步 skill..."
-echo "   Skill 仓库: $SKILL_DIR"
-echo ""
-
-# Step 1: 从已安装的 Agent 拉取 skill 到仓库
-echo "📥 Step 1: 从 Agent 拉取 skill 到仓库"
-for conf in "$SKILL_ONCE/adapters/"*.yaml; do
-    [ -f "$conf" ] || continue
-    [[ "$(basename "$conf")" == _* ]] && continue
-
-    agent_name=$(grep "^name:" "$conf" | awk '{print $2}')
-    agent_path=$(grep "^path:" "$conf" | awk '{print $2}')
-    agent_path=$(eval echo "$agent_path")
-
-    [ -z "$agent_path" ] || [ ! -d "$agent_path" ] && continue
-
-    # 只处理已安装 SkillOnce 的 Agent
-    if ! is_installed "$agent_path"; then
-        continue
-    fi
-
-    # 获取 builtin_paths
-    builtin_paths=$(grep -A 10 "builtin_paths:" "$conf" | grep "  -" | awk '{print $2}')
-
-    # 检查 Agent 中的 skill（非 symlink 的真实目录）
-    for skill in "$agent_path"/*/; do
-        [ -d "$skill" ] || continue
-        [ -L "$skill" ] && continue  # 跳过 symlink
-
-        name=$(basename "$skill")
-        # 跳过 skill-once 本身
-        [ "$name" = "skill-once" ] && continue
-
-        # 跳过内置 skill
-        skip=false
-        for bp in $builtin_paths; do
-            bp=$(eval echo "$bp")
-            if [ -d "$bp/$name" ]; then
-                skip=true
-                break
-            fi
-        done
-        $skip && continue
-
-        if [ ! -d "$SKILL_DIR/$name" ]; then
-            echo "  📦 从 $agent_name 拉取: $name"
-            cp -r "$skill" "$SKILL_DIR/$name"
-            ((PULLED++))
-        fi
-    done
-done
-echo ""
-
-# Step 2: 从仓库推送到已安装的 Agent
-echo "📤 Step 2: 从仓库推送到 Agent"
-for skill in "$SKILL_DIR"/*/; do
-    [ -d "$skill" ] || continue
-    name=$(basename "$skill")
-
+# 获取所有已安装的 Agent
+get_installed_agents() {
+    local agents=()
     for conf in "$SKILL_ONCE/adapters/"*.yaml; do
         [ -f "$conf" ] || continue
         [[ "$(basename "$conf")" == _* ]] && continue
@@ -91,25 +31,235 @@ for skill in "$SKILL_DIR"/*/; do
 
         [ -z "$agent_path" ] || [ ! -d "$agent_path" ] && continue
 
-        # 只处理已安装 SkillOnce 的 Agent
-        if ! is_installed "$agent_path"; then
-            continue
+        if is_installed "$agent_path"; then
+            agents+=("$agent_name")
         fi
+    done
+    echo "${agents[@]}"
+}
 
-        if [ -L "$agent_path/$name" ]; then
-            ((SKIPPED++))
-            continue
+# 交互式选择 Agent
+select_agents() {
+    echo "📋 Agent 安装状态扫描:"
+    echo ""
+    echo "  序号  状态      Agent 名称"
+    echo "  ----  --------  ----------"
+    
+    local index=1
+    local installed_list=()
+    local not_installed_list=()
+    
+    for conf in "$SKILL_ONCE/adapters/"*.yaml; do
+        [ -f "$conf" ] || continue
+        [[ "$(basename "$conf")" == _* ]] && continue
+
+        agent_name=$(grep "^name:" "$conf" | awk '{print $2}')
+        agent_path=$(grep "^path:" "$conf" | awk '{print $2}')
+        agent_path=$(eval echo "$agent_path")
+
+        [ -z "$agent_path" ] || [ ! -d "$agent_path" ] && continue
+
+        if is_installed "$agent_path"; then
+            echo "  $index     ✅ 已安装  $agent_name"
+            installed_list+=("$agent_name")
+        else
+            echo "  $index     ❌ 未安装  $agent_name"
+            not_installed_list+=("$agent_name")
         fi
+        ((index++))
+    done
+    
+    echo ""
+    echo "  已安装: ${#installed_list[@]} 个"
+    echo "  未安装: ${#not_installed_list[@]} 个"
+    echo ""
+    echo "  操作选项:"
+    echo "    a. 同步到所有已安装的 Agent"
+    echo "    s. 手动选择要同步的 Agent"
+    echo "    q. 取消"
+    echo ""
+    read -p "请选择操作: " choice
 
-        if [ -d "$agent_path/$name" ]; then
-            ((SKIPPED++))
-            continue
-        fi
+    case "$choice" in
+        q|Q)
+            echo "已取消"
+            exit 0
+            ;;
+        a|A)
+            echo "${installed_list[@]}"
+            ;;
+        s|S)
+            echo ""
+            echo "请输入要同步的 Agent 序号 (多个用空格分隔，如: 1 3 5): "
+            read -p "> " nums
+            
+            local selected=()
+            for num in $nums; do
+                if [[ "$num" =~ ^[0-9]+$ ]] && [ "$num" -ge 1 ] && [ "$num" -le $((index-1)) ]; then
+                    # 根据序号找到对应的 agent
+                    local conf_index=1
+                    for conf in "$SKILL_ONCE/adapters/"*.yaml; do
+                        [ -f "$conf" ] || continue
+                        [[ "$(basename "$conf")" == _* ]] && continue
+                        
+                        local conf_name=$(grep "^name:" "$conf" | awk '{print $2}')
+                        local conf_path=$(grep "^path:" "$conf" | awk '{print $2}')
+                        conf_path=$(eval echo "$conf_path")
+                        
+                        [ -z "$conf_path" ] || [ ! -d "$conf_path" ] && continue
+                        
+                        if [ "$conf_index" -eq "$num" ]; then
+                            if is_installed "$conf_path"; then
+                                selected+=("$conf_name")
+                            else
+                                echo "  ⚠️  $conf_name 未安装 SkillOnce，跳过"
+                            fi
+                            break
+                        fi
+                        ((conf_index++))
+                    done
+                fi
+            done
+            
+            if [ ${#selected[@]} -eq 0 ]; then
+                echo "❌ 无效的选择"
+                exit 1
+            fi
+            
+            echo "${selected[@]}"
+            ;;
+        *)
+            echo "❌ 无效的选择"
+            exit 1
+            ;;
+    esac
+}
 
-        mkdir -p "$agent_path"
-        ln -s "$skill" "$agent_path/$name"
-        echo "  ✅ $name → $agent_name"
-        ((SYNCED++))
+# 主逻辑
+INTERACTIVE=false
+SYNC_ALL=false
+
+# 解析参数
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -i|--interactive)
+            INTERACTIVE=true
+            shift
+            ;;
+        -a|--all)
+            SYNC_ALL=true
+            shift
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
+
+# 确定要同步的 Agent
+if [ "$INTERACTIVE" = true ]; then
+    TARGET_AGENTS=($(select_agents))
+elif [ "$SYNC_ALL" = true ]; then
+    TARGET_AGENTS=($(get_installed_agents))
+else
+    # 默认：同步所有已安装的 Agent
+    TARGET_AGENTS=($(get_installed_agents))
+fi
+
+echo "🔄 同步 skill..."
+echo "   Skill 仓库: $SKILL_DIR"
+echo "   目标 Agent: ${TARGET_AGENTS[*]}"
+echo ""
+
+SYNCED=0
+SKIPPED=0
+PULLED=0
+
+# Step 1: 从已安装的 Agent 拉取 skill 到仓库
+echo "📥 Step 1: 从 Agent 拉取 skill 到仓库"
+for agent_name in "${TARGET_AGENTS[@]}"; do
+    # 找到对应的配置
+    for conf in "$SKILL_ONCE/adapters/"*.yaml; do
+        [ -f "$conf" ] || continue
+        [[ "$(basename "$conf")" == _* ]] && continue
+
+        conf_name=$(grep "^name:" "$conf" | awk '{print $2}')
+        [ "$conf_name" != "$agent_name" ] && continue
+
+        agent_path=$(grep "^path:" "$conf" | awk '{print $2}')
+        agent_path=$(eval echo "$agent_path")
+
+        [ -z "$agent_path" ] || [ ! -d "$agent_path" ] && continue
+
+        # 获取 builtin_paths
+        builtin_paths=$(grep -A 10 "builtin_paths:" "$conf" | grep "  -" | awk '{print $2}')
+
+        # 检查 Agent 中的 skill
+        for skill in "$agent_path"/*/; do
+            [ -d "$skill" ] || continue
+            [ -L "$skill" ] && continue
+
+            name=$(basename "$skill")
+            [ "$name" = "skill-once" ] && continue
+
+            # 跳过内置 skill
+            skip=false
+            for bp in $builtin_paths; do
+                bp=$(eval echo "$bp")
+                if [ -d "$bp/$name" ]; then
+                    skip=true
+                    break
+                fi
+            done
+            $skip && continue
+
+            if [ ! -d "$SKILL_DIR/$name" ]; then
+                echo "  📦 从 $agent_name 拉取: $name"
+                cp -r "$skill" "$SKILL_DIR/$name"
+                ((PULLED++))
+            fi
+        done
+        break
+    done
+done
+echo ""
+
+# Step 2: 从仓库推送到已安装的 Agent
+echo "📤 Step 2: 从仓库推送到 Agent"
+for skill in "$SKILL_DIR"/*/; do
+    [ -d "$skill" ] || continue
+    name=$(basename "$skill")
+
+    for agent_name in "${TARGET_AGENTS[@]}"; do
+        # 找到对应的配置
+        for conf in "$SKILL_ONCE/adapters/"*.yaml; do
+            [ -f "$conf" ] || continue
+            [[ "$(basename "$conf")" == _* ]] && continue
+
+            conf_name=$(grep "^name:" "$conf" | awk '{print $2}')
+            [ "$conf_name" != "$agent_name" ] && continue
+
+            agent_path=$(grep "^path:" "$conf" | awk '{print $2}')
+            agent_path=$(eval echo "$agent_path")
+
+            [ -z "$agent_path" ] || [ ! -d "$agent_path" ] && continue
+
+            if [ -L "$agent_path/$name" ]; then
+                ((SKIPPED++))
+                continue
+            fi
+
+            if [ -d "$agent_path/$name" ]; then
+                ((SKIPPED++))
+                continue
+            fi
+
+            mkdir -p "$agent_path"
+            ln -s "$skill" "$agent_path/$name"
+            echo "  ✅ $name → $agent_name"
+            ((SYNCED++))
+            break
+        done
     done
 done
 
