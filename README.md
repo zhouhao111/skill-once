@@ -130,11 +130,35 @@ Claude Code ✅  Cursor ✅  Trae ✅  Hermes ✅  ...
 
 ## 安装
 
-### 一键安装
+### 方式 1：npx（推荐）
+
+```bash
+npx skill-once init
+```
+
+无需安装，直接运行。适合想尝鲜的用户。
+
+### 方式 2：bunx
+
+```bash
+bunx skill-once init
+```
+
+更快的运行速度。适合追求性能的用户。
+
+### 方式 3：pnpm
+
+```bash
+pnpm dlx skill-once init
+```
+
+节省磁盘空间。适合使用 pnpm 的用户。
+
+### 方式 4：Git Clone（传统方式）
 
 ```bash
 # 克隆仓库
-git clone https://github.com/your-username/skill-once.git ~/.agents/skill-once
+git clone https://github.com/zhouhao111/skill-once.git ~/.agents/skill-once
 
 # 运行初始化向导
 bash ~/.agents/skill-once/scripts/init.sh
@@ -149,6 +173,8 @@ bash ~/.agents/skill-once/scripts/init.sh
 
 ```bash
 # 查看部署状态
+skill-once status
+# 或
 bash ~/.agents/skill-once/scripts/status.sh
 ```
 
@@ -156,32 +182,42 @@ bash ~/.agents/skill-once/scripts/status.sh
 
 ## 快速开始
 
-### 添加 Skill
+### 从 GitHub 安装 Skill
+
+```bash
+# 安装指定 skill
+skill-once add https://github.com/user/repo --skill skill-name
+
+# 安装整个仓库（如果只有一个 skill）
+skill-once add https://github.com/user/repo
+```
+
+### 从本地安装 Skill
 
 ```bash
 # 从本地目录添加
-bash ~/.agents/skill-once/scripts/add.sh my-skill /path/to/my-skill
+skill-once add my-skill /path/to/my-skill
 
 # 同步到所有 Agent
-bash ~/.agents/skill-once/scripts/sync.sh
+skill-once sync
 ```
 
 ### 同步所有 Skill
 
 ```bash
-bash ~/.agents/skill-once/scripts/sync.sh
+skill-once sync
 ```
 
 ### 删除 Skill
 
 ```bash
-bash ~/.agents/skill-once/scripts/remove.sh my-skill
+skill-once remove my-skill
 ```
 
 ### 查看状态
 
 ```bash
-bash ~/.agents/skill-once/scripts/status.sh
+skill-once status
 ```
 
 ---
@@ -256,13 +292,14 @@ bash ~/.agents/skill-once/scripts/status.sh
 
 | 命令 | 说明 |
 |------|------|
-| `init.sh` | 初始化 SkillOnce |
-| `detect.sh` | 检测已安装的 Agent |
-| `gen-config.sh` | 生成 Agent 配置 |
-| `sync.sh` | 同步所有 skill |
-| `add.sh` | 添加新 skill |
-| `remove.sh` | 删除 skill |
-| `status.sh` | 查看部署状态 |
+| `skill-once init` | 初始化 SkillOnce |
+| `skill-once add <名称> <路径>` | 从本地添加 skill |
+| `skill-once add <URL> --skill <名称>` | 从 GitHub 安装 skill |
+| `skill-once remove <名称>` | 删除 skill |
+| `skill-once sync` | 同步所有 skill |
+| `skill-once status` | 查看部署状态 |
+| `skill-once list` | 列出所有 skill |
+| `skill-once detect` | 检测已安装的 Agent |
 
 ### 添加新 Agent
 

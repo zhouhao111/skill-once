@@ -1,0 +1,43 @@
+{
+  "name": "skill-once",
+  "version": "1.0.0",
+  "description": "一次安装，处处可用。AI Agent 公共 Skill 仓库管理工具。",
+  "main": "bin/skill-once",
+  "bin": {
+    "skill-once": "bin/skill-once"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "skill",
+    "ai-agent",
+    "claude",
+    "cursor",
+    "trae",
+    "hermes",
+    "symlink",
+    "sync"
+  ],
+  "author": "Zhouhao",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zhouhao111/skill-once.git"
+  },
+  "homepage": "https://github.com/zhouhao111/skill-once#readme",
+  "bugs": {
+    "url": "https://github.com/zhouhao111/skill-once/issues"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "files": [
+    "bin/",
+    "scripts/",
+    "adapters/",
+    "templates/",
+    "SKILL.md",
+    "config.yaml"
+  ]
+}

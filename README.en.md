@@ -83,21 +83,37 @@ Agents reference via symlinks:
 
 ## Installation
 
-### Prerequisites
-
-- macOS or Linux
-- Bash shell
-- Git
-
-### Step 1: Clone the Repository
+### Method 1: npx (Recommended)
 
 ```bash
-git clone https://github.com/zhouhao111/skill-once.git ~/.agents/skill-once
+npx skill-once init
 ```
 
-### Step 2: Initialize
+No installation required. Run directly. Perfect for trying it out.
+
+### Method 2: bunx
 
 ```bash
+bunx skill-once init
+```
+
+Faster execution speed. Perfect for performance-conscious users.
+
+### Method 3: pnpm
+
+```bash
+pnpm dlx skill-once init
+```
+
+Saves disk space. Perfect for pnpm users.
+
+### Method 4: Git Clone (Traditional)
+
+```bash
+# Clone the repository
+git clone https://github.com/zhouhao111/skill-once.git ~/.agents/skill-once
+
+# Run initialization wizard
 bash ~/.agents/skill-once/scripts/init.sh
 ```
 
@@ -114,62 +130,35 @@ Please choose skill repository location:
 Enter option [1]: 
 ```
 
-### Step 3: Detect Installed Agents
+### Verify Installation
 
 ```bash
-bash ~/.agents/skill-once/scripts/detect.sh
-```
-
-Example output:
-
-```
-📦 Claude Code
-   User skill directory: ~/.claude/skills
-   Built-in skill directory: Not detected
-
-📦 Cursor
-   User skill directory: ~/.cursor/skills
-   Built-in skill directory: ~/.cursor/skills-cursor
-   Built-in skill count: 18
-```
-
-### Step 4: Generate Agent Configuration
-
-```bash
-bash ~/.agents/skill-once/scripts/gen-config.sh
-```
-
-### Step 5: Sync Skills
-
-```bash
-bash ~/.agents/skill-once/scripts/sync.sh
-```
-
-Example output:
-
-```
-🔄 Syncing skills to agents...
-   Skill repository: ~/.agents/.mySkillRepository
-
-  ✅ my-skill → claude-code
-  ✅ my-skill → cursor
-  ✅ my-skill → hermes
-  ...
-
-Sync complete: 24 created, 0 existing, 0 skipped
+# View deployment status
+skill-once status
+# Or
+bash ~/.agents/skill-once/scripts/status.sh
 ```
 
 ## Usage Guide
 
-### Adding a New Skill
+### Installing Skills from GitHub
+
+```bash
+# Install a specific skill
+skill-once add https://github.com/user/repo --skill skill-name
+
+# Install the entire repository (if it contains only one skill)
+skill-once add https://github.com/user/repo
+```
+
+### Adding Skills from Local Directory
 
 ```bash
 # Add from local directory
-bash ~/.agents/skill-once/scripts/add.sh my-skill /path/to/my-skill
+skill-once add my-skill /path/to/my-skill
 
-# Add from Git repository
-git clone https://github.com/user/skill-repo.git /tmp/my-skill
-bash ~/.agents/skill-once/scripts/add.sh my-skill /tmp/my-skill
+# Sync to all agents
+skill-once sync
 ```
 
 ### Modifying a Skill
@@ -181,19 +170,19 @@ Edit the skill source file directly, then sync:
 vim ~/.agents/.mySkillRepository/my-skill/SKILL.md
 
 # Sync to all agents
-bash ~/.agents/skill-once/scripts/sync.sh
+skill-once sync
 ```
 
 ### Deleting a Skill
 
 ```bash
-bash ~/.agents/skill-once/scripts/remove.sh my-skill
+skill-once remove my-skill
 ```
 
 ### Viewing Status
 
 ```bash
-bash ~/.agents/skill-once/scripts/status.sh
+skill-once status
 ```
 
 Example output:
@@ -245,7 +234,10 @@ notes: |
 ├── README.md                   # Project documentation (Chinese)
 ├── README.en.md                # Project documentation (English)
 ├── LICENSE                     # MIT License
+├── package.json                # npm package configuration
 ├── config.yaml                 # Configuration file
+├── bin/                        # CLI entry point
+│   └── skill-once              # Global CLI command
 ├── adapters/                   # Agent adapter configurations
 │   ├── _base.yaml              # Base configuration
 │   ├── claude-code.yaml
@@ -261,7 +253,8 @@ notes: |
 │   ├── detect.sh               # Detect agents
 │   ├── gen-config.sh           # Generate configuration
 │   ├── sync.sh                 # Sync skills
-│   ├── add.sh                  # Add skill
+│   ├── add.sh                  # Add skill from local
+│   ├── add-from-git.sh         # Add skill from GitHub
 │   ├── remove.sh               # Remove skill
 │   └── status.sh               # View status
 └── templates/                  # Skill templates
@@ -272,13 +265,14 @@ notes: |
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `init.sh` | Initialize SkillOnce | `bash scripts/init.sh` |
-| `detect.sh` | Detect installed agents | `bash scripts/detect.sh` |
-| `gen-config.sh` | Generate agent configuration | `bash scripts/gen-config.sh` |
-| `sync.sh` | Sync all skills | `bash scripts/sync.sh` |
-| `add.sh` | Add new skill | `bash scripts/add.sh name path` |
-| `remove.sh` | Delete skill | `bash scripts/remove.sh name` |
-| `status.sh` | View deployment status | `bash scripts/status.sh` |
+| `skill-once init` | Initialize SkillOnce | `skill-once init` |
+| `skill-once add <name> <path>` | Add skill from local | `skill-once add my-skill ./my-skill` |
+| `skill-once add <URL> --skill <name>` | Install from GitHub | `skill-once add https://github.com/user/repo --skill xxx` |
+| `skill-once remove <name>` | Delete skill | `skill-once remove my-skill` |
+| `skill-once sync` | Sync all skills | `skill-once sync` |
+| `skill-once status` | View deployment status | `skill-once status` |
+| `skill-once list` | List all skills | `skill-once list` |
+| `skill-once detect` | Detect installed agents | `skill-once detect` |
 
 ## Adding New Agents
 
