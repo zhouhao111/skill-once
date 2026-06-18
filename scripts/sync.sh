@@ -48,6 +48,7 @@ select_agents() {
     local index=1
     local installed_list=()
     local not_installed_list=()
+    local all_list=()
     
     for conf in "$SKILL_ONCE/adapters/"*.yaml; do
         [ -f "$conf" ] || continue
@@ -59,6 +60,8 @@ select_agents() {
 
         [ -z "$agent_path" ] || [ ! -d "$agent_path" ] && continue
 
+        all_list+=("$agent_name")
+        
         if is_installed "$agent_path"; then
             echo "  $index     ✅ 已安装  $agent_name"
             installed_list+=("$agent_name")
@@ -70,25 +73,35 @@ select_agents() {
     done
     
     echo ""
-    echo "  已安装: ${#installed_list[@]} 个"
-    echo "  未安装: ${#not_installed_list[@]} 个"
+    echo "  ─────────────────────────────────"
+    echo "  已安装: ${#installed_list[@]} 个 (已接入 skill-once)"
+    echo "  未安装: ${#not_installed_list[@]} 个 (未接入 skill-once)"
+    echo "  ─────────────────────────────────"
+    echo ""
+    echo "  💡 已安装 = Agent skill 目录下存在 skill-once，可正常同步"
+    echo "  💡 未安装 = Agent 未接入 skill-once，同步会失败"
     echo ""
     echo "  操作选项:"
-    echo "    a. 同步到所有已安装的 Agent"
-    echo "    s. 手动选择要同步的 Agent"
-    echo "    q. 取消"
+    echo "    1. 同步到所有已安装的 Agent (${#installed_list[@]} 个)"
+    echo "    2. 同步到所有 Agent (${#all_list[@]} 个，包括未安装的)"
+    echo "    3. 手动选择要同步的 Agent"
+    echo "    4. 取消"
     echo ""
-    read -p "请选择操作: " choice
+    read -p "请选择操作 [1-4]: " choice
 
     case "$choice" in
-        q|Q)
-            echo "已取消"
-            exit 0
-            ;;
-        a|A)
+        1)
+            if [ ${#installed_list[@]} -eq 0 ]; then
+                echo ""
+                echo "❌ 没有已安装 SkillOnce 的 Agent"
+                exit 1
+            fi
             echo "${installed_list[@]}"
             ;;
-        s|S)
+        2)
+            echo "${all_list[@]}"
+            ;;
+        3)
             echo ""
             echo "请输入要同步的 Agent 序号 (多个用空格分隔，如: 1 3 5): "
             read -p "> " nums
@@ -96,40 +109,26 @@ select_agents() {
             local selected=()
             for num in $nums; do
                 if [[ "$num" =~ ^[0-9]+$ ]] && [ "$num" -ge 1 ] && [ "$num" -le $((index-1)) ]; then
-                    # 根据序号找到对应的 agent
-                    local conf_index=1
-                    for conf in "$SKILL_ONCE/adapters/"*.yaml; do
-                        [ -f "$conf" ] || continue
-                        [[ "$(basename "$conf")" == _* ]] && continue
-                        
-                        local conf_name=$(grep "^name:" "$conf" | awk '{print $2}')
-                        local conf_path=$(grep "^path:" "$conf" | awk '{print $2}')
-                        conf_path=$(eval echo "$conf_path")
-                        
-                        [ -z "$conf_path" ] || [ ! -d "$conf_path" ] && continue
-                        
-                        if [ "$conf_index" -eq "$num" ]; then
-                            if is_installed "$conf_path"; then
-                                selected+=("$conf_name")
-                            else
-                                echo "  ⚠️  $conf_name 未安装 SkillOnce，跳过"
-                            fi
-                            break
-                        fi
-                        ((conf_index++))
-                    done
+                    selected+=("${all_list[$((num-1))]}")
                 fi
             done
             
             if [ ${#selected[@]} -eq 0 ]; then
+                echo ""
                 echo "❌ 无效的选择"
                 exit 1
             fi
             
             echo "${selected[@]}"
             ;;
+        4|q|Q)
+            echo ""
+            echo "已取消"
+            exit 0
+            ;;
         *)
-            echo "❌ 无效的选择"
+            echo ""
+            echo "❌ 无效的选择，请输入 1-4"
             exit 1
             ;;
     esac
