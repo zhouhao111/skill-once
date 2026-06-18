@@ -4,6 +4,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+[English](README.en.md) | 简体中文
+
 ## 目录
 
 - [概述](#概述)
