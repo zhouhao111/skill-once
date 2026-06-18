@@ -6,183 +6,169 @@
 
 [English](README.en.md) | 简体中文
 
-## 目录
+## 这是什么？
 
-- [概述](#概述)
-- [核心特性](#核心特性)
-- [工作原理](#工作原理)
-- [支持的 Agent](#支持的-agent)
-- [安装](#安装)
-- [使用指南](#使用指南)
-- [配置](#配置)
-- [项目结构](#项目结构)
-- [命令参考](#命令参考)
-- [添加新 Agent](#添加新-agent)
-- [故障排除](#故障排除)
-- [FAQ](#faq)
-- [Roadmap](#roadmap)
-- [贡献](#贡献)
-- [License](#license)
+你同时使用多个 AI Agent（Claude Code、Cursor、Trae、Hermes 等）吗？
+
+**SkillOnce** 让你在任何 Agent 中安装的 skill，自动同步到所有 Agent。你只需安装一次，所有 Agent 都能用。
+
+```
+你装了一个 skill
+     ↓
+SkillOnce 自动同步到所有 Agent
+     ↓
+Claude Code ✅  Cursor ✅  Trae ✅  Hermes ✅  ...
+```
 
 ---
 
-## 概述
+## 场景说明
 
-你是否同时使用多个 AI Agent 工具（Claude Code、Cursor、Trae、Hermes 等）？是否为同一个 skill 需要在每个 agent 中重复安装而烦恼？
+### 场景 1：我装了一个新 skill
 
-**SkillOnce** 解决这个问题。它作为中心仓库，通过 symlink 将 skill 同步到所有 agent，实现：
+**你做的事**：在任意 Agent 中安装一个 skill
 
-- **一处安装，处处可用** — skill 只存一份，所有 agent 共享
-- **一处修改，处处生效** — 修改源文件，所有 agent 立即更新
-- **内置保护** — 不会覆盖任何 agent 的原生 skill
+**SkillOnce 自动做的事**：
+1. 检测到新 skill
+2. 同步到 skill 仓库
+3. 通过 symlink 部署到所有其他 Agent
+4. 所有 Agent 立即可用
 
-## 核心特性
+**结果**：你在 Claude Code 装的 skill，Cursor、Trae、Hermes 都能用。
 
-| 特性 | 说明 |
-|------|------|
-| **Symlink 同步** | 基于符号链接，零副本，修改即生效 |
-| **自动检测** | 自动识别已安装的 Agent 及其 skill 规则 |
-| **内置保护** | 跳过 Agent 的原生 skill，不会造成冲突 |
-| **可配置** | skill 存储路径可自定义 |
-| **轻量级** | 纯 bash 脚本，无额外依赖 |
-| **可扩展** | 轻松添加对新 Agent 的支持 |
+---
 
-## 工作原理
+### 场景 2：我修改了 skill 的内容
 
-```
-~/.agents/.mySkillRepository/         ← 唯一真相源（你的 skill）
-├── my-skill-1/
-│   └── SKILL.md
-├── my-skill-2/
-│   └── SKILL.md
-└── ...
+**你做的事**：编辑任意 Agent 中的 skill 文件
 
-~/.agents/skill-once/                 ← 管理工具
-├── SKILL.md                          ← 告诉 Agent 如何管理 skill
-├── config.yaml                       ← 配置文件
-├── adapters/                         ← Agent 适配器
-└── scripts/                          ← 管理脚本
+**SkillOnce 自动做的事**：
+1. 由于 symlink 机制，修改直接生效
+2. 所有 Agent 看到的是同一个文件
+3. 无需重新同步
 
-各 Agent 通过 symlink 引用：
-~/.claude/skills/my-skill-1 → ~/.agents/.mySkillRepository/my-skill-1
-~/.cursor/skills/my-skill-1 → ~/.agents/.mySkillRepository/my-skill-1
-~/.hermes/skills/my-skill-1 → ~/.agents/.mySkillRepository/my-skill-1
-...
-```
+**结果**：你在 Claude Code 修改了 skill，Cursor 立即看到最新版本。
+
+---
+
+### 场景 3：我删除了一个 skill
+
+**你做的事**：删除任意 Agent 中的 skill
+
+**SkillOnce 自动做的事**：
+1. 从所有 Agent 中移除该 skill
+2. 从 skill 仓库中删除
+
+**结果**：所有 Agent 中该 skill 都消失了。
+
+---
+
+### 场景 4：我安装了一个新的 Agent
+
+**你做的事**：安装新的 AI Agent（比如 Junie）
+
+**SkillOnce 自动做的事**：
+1. 下次同步时自动检测到新 Agent
+2. 将所有已有 skill 同步到新 Agent
+3. 新 Agent 立即拥有所有 skill
+
+**结果**：你之前装的所有 skill，新 Agent 都能用。
+
+---
+
+### 场景 5：我想看看当前状态
+
+**你做的事**：查看 skill 部署状态
+
+**SkillOnce 自动做的事**：
+1. 显示所有 skill 在各 Agent 中的部署情况
+2. 标记哪些已同步、哪些未同步
+
+**结果**：一目了然知道每个 skill 在哪些 Agent 中可用。
+
+---
+
+### 场景 6：我想备份我的 skill
+
+**你做的事**：备份 skill 仓库目录
+
+**SkillOnce 自动做的事**：
+1. skill 仓库是一个 Git 仓库
+2. 可以推送到 GitHub/Gitee
+3. 换电脑时直接 clone 恢复
+
+**结果**：你的所有 skill 都有版本控制和云端备份。
+
+---
+
+### 场景 7：我想临时不同步某个 Agent
+
+**你做的事**：在适配器配置中禁用某个 Agent
+
+**SkillOnce 自动做的事**：
+1. 跳过被禁用的 Agent
+2. 其他 Agent 正常同步
+
+**结果**：只同步你想要的 Agent。
+
+---
 
 ## 支持的 Agent
 
-| Agent | 用户 Skill 目录 | 内置 Skill 目录 | 状态 |
-|-------|----------------|----------------|------|
-| Claude Code | `~/.claude/skills/` | 无 | ✅ 支持 |
-| Cursor | `~/.cursor/skills/` | `~/.cursor/skills-cursor/` | ✅ 支持 |
-| Trae | `~/.trae/skills/` | - | ✅ 支持 |
-| Trae CN | `~/.trae-cn/skills/` | `~/.trae-cn/builtin/` | ✅ 支持 |
-| Hermes | `~/.hermes/skills/` | `~/.hermes/hermes-agent/skills/` | ✅ 支持 |
-| Qoder | `~/.qoder/skills/` | - | ✅ 支持 |
-| Junie | `~/.junie/skills/` | - | ✅ 支持 |
-| Lingma | `~/.lingma/skills/` | - | ✅ 支持 |
+| Agent | 状态 |
+|-------|------|
+| Claude Code | ✅ 支持 |
+| Cursor | ✅ 支持 |
+| Trae | ✅ 支持 |
+| Trae CN | ✅ 支持 |
+| Hermes | ✅ 支持 |
+| Qoder | ✅ 支持 |
+| Junie | ✅ 支持 |
+| Lingma | ✅ 支持 |
+
+---
 
 ## 安装
 
-### 前置要求
-
-- macOS 或 Linux
-- Bash shell
-- Git
-
-### 步骤 1：克隆仓库
+### 一键安装
 
 ```bash
+# 克隆仓库
 git clone https://github.com/your-username/skill-once.git ~/.agents/skill-once
-```
 
-### 步骤 2：初始化
-
-```bash
+# 运行初始化向导
 bash ~/.agents/skill-once/scripts/init.sh
 ```
 
-首次运行会提示选择 skill 存储位置：
+初始化向导会自动：
+1. 检测你已安装的 Agent
+2. 生成适配器配置
+3. 提示选择 skill 存储位置
 
-```
-🔧 SkillOnce 首次初始化
-
-请选择 skill 仓库位置:
-  1) ~/.agents/.mySkillRepository (默认，本地仓库)
-  2) ~/.my-skills
-  3) 自定义路径
-
-输入选项 [1]: 
-```
-
-### 步骤 3：检测已安装的 Agent
+### 验证安装
 
 ```bash
-bash ~/.agents/skill-once/scripts/detect.sh
+# 查看部署状态
+bash ~/.agents/skill-once/scripts/status.sh
 ```
 
-输出示例：
+---
 
-```
-📦 Claude Code
-   用户 skill 目录: ~/.claude/skills
-   内置 skill 目录: 未检测到
+## 快速开始
 
-📦 Cursor
-   用户 skill 目录: ~/.cursor/skills
-   内置 skill 目录: ~/.cursor/skills-cursor
-   内置 skill 数量: 18
-```
-
-### 步骤 4：生成 Agent 配置
-
-```bash
-bash ~/.agents/skill-once/scripts/gen-config.sh
-```
-
-### 步骤 5：同步 Skill
-
-```bash
-bash ~/.agents/skill-once/scripts/sync.sh
-```
-
-输出示例：
-
-```
-🔄 同步 skill 到各 agent...
-   Skill 仓库: ~/.agents/.mySkillRepository
-
-  ✅ my-skill → claude-code
-  ✅ my-skill → cursor
-  ✅ my-skill → hermes
-  ...
-
-同步完成: 24 个创建, 0 个已存在, 0 个跳过
-```
-
-## 使用指南
-
-### 添加新 Skill
+### 添加 Skill
 
 ```bash
 # 从本地目录添加
 bash ~/.agents/skill-once/scripts/add.sh my-skill /path/to/my-skill
 
-# 从 Git 仓库添加
-git clone https://github.com/user/skill-repo.git /tmp/my-skill
-bash ~/.agents/skill-once/scripts/add.sh my-skill /tmp/my-skill
+# 同步到所有 Agent
+bash ~/.agents/skill-once/scripts/sync.sh
 ```
 
-### 修改 Skill
-
-直接编辑 skill 源文件，然后同步：
+### 同步所有 Skill
 
 ```bash
-# 编辑 skill
-vim ~/.agents/.mySkillRepository/my-skill/SKILL.md
-
-# 同步到所有 agent
 bash ~/.agents/skill-once/scripts/sync.sh
 ```
 
@@ -198,152 +184,17 @@ bash ~/.agents/skill-once/scripts/remove.sh my-skill
 bash ~/.agents/skill-once/scripts/status.sh
 ```
 
-输出示例：
+---
 
-```
-📊 SkillOnce 部署状态
-======================
-Skill 仓库: ~/.agents/.mySkillRepository
+## 常见问题
 
-📦 my-skill
-   ✅ claude-code
-   ✅ cursor
-   ✅ hermes
-   ...
+### Q: 会覆盖 Agent 的内置 skill 吗？
 
-======================
-共 6 个 skill
-```
-
-## 配置
-
-### config.yaml
-
-```yaml
-# SkillOnce 配置
-# skill_dir: skill 存储路径
-skill_dir: ~/.agents/.mySkillRepository
-```
-
-### Adapter 配置示例
-
-```yaml
-# ~/.agents/skill-once/adapters/cursor.yaml
-name: cursor
-path: ~/.cursor/skills
-supports_symlink: true
-builtin_paths:
-  - ~/.cursor/skills-cursor/
-notes: |
-  Cursor 内置 skill 在 skills-cursor/ 目录，由 Cursor 维护。
-  我们只同步到用户目录 skills/。
-```
-
-## 项目结构
-
-```
-~/.agents/skill-once/
-├── SKILL.md                    # Agent 读取的 skill 定义
-├── README.md                   # 项目文档
-├── config.yaml                 # 配置文件
-├── adapters/                   # Agent 适配器配置
-│   ├── _base.yaml              # 公共配置
-│   ├── claude-code.yaml
-│   ├── cursor.yaml
-│   ├── hermes.yaml
-│   ├── trae.yaml
-│   ├── trae-cn.yaml
-│   ├── qoder.yaml
-│   ├── junie.yaml
-│   └── lingma.yaml
-├── scripts/                    # 管理脚本
-│   ├── init.sh                 # 初始化
-│   ├── detect.sh               # 检测 Agent
-│   ├── gen-config.sh           # 生成配置
-│   ├── sync.sh                 # 同步 skill
-│   ├── add.sh                  # 添加 skill
-│   ├── remove.sh               # 删除 skill
-│   └── status.sh               # 查看状态
-└── templates/                  # Skill 模板
-    └── new-skill/
-```
-
-## 命令参考
-
-| 命令 | 说明 | 示例 |
-|------|------|------|
-| `init.sh` | 初始化 SkillOnce | `bash scripts/init.sh` |
-| `detect.sh` | 检测已安装的 Agent | `bash scripts/detect.sh` |
-| `gen-config.sh` | 生成 Agent 配置 | `bash scripts/gen-config.sh` |
-| `sync.sh` | 同步所有 skill | `bash scripts/sync.sh` |
-| `add.sh` | 添加新 skill | `bash scripts/add.sh name path` |
-| `remove.sh` | 删除 skill | `bash scripts/remove.sh name` |
-| `status.sh` | 查看部署状态 | `bash scripts/status.sh` |
-
-## 添加新 Agent
-
-### 步骤 1：创建 Adapter 配置
-
-在 `~/.agents/skill-once/adapters/` 创建 `<agent-name>.yaml`：
-
-```yaml
-name: agent-name
-path: ~/.<agent-name>/skills
-supports_symlink: true
-builtin_paths:
-  - ~/.<agent-name>/builtin/    # 可选：内置 skill 目录
-notes: |
-  说明信息...
-```
-
-### 步骤 2：运行同步
-
-```bash
-bash ~/.agents/skill-once/scripts/sync.sh
-```
-
-## 故障排除
-
-### Symlink 已存在
-
-**现象**：`⚠️ xxx 在 agent_name 中是真实目录，跳过`
-
-**原因**：该 skill 在 agent 中是真实目录（非 symlink），可能是 agent 原生或手动安装的。
-
-**解决**：
-1. 如果是手动安装的，可删除后重新同步
-2. 如果是 agent 原生的，无需处理（会被保护）
-
-### Skill 未同步到某个 Agent
-
-**现象**：`status.sh` 显示某个 agent 未安装
-
-**原因**：该 agent 的 skill 目录不存在或未配置。
-
-**解决**：
-1. 运行 `detect.sh` 检测 agent
-2. 运行 `gen-config.sh` 生成配置
-3. 重新运行 `sync.sh`
-
-### 如何修改 Skill 存储路径
-
-编辑 `~/.agents/skill-once/config.yaml`：
-
-```yaml
-skill_dir: ~/.新的路径
-```
-
-然后重新运行 `sync.sh`。
-
-## FAQ
-
-### Q: SkillOnce 会覆盖 Agent 的内置 skill 吗？
-
-**A: 不会。** sync 脚本会跳过已存在的目录，只创建 symlink。Agent 的内置 skill 完全不受影响。
+**A: 不会。** SkillOnce 自动跳过已存在的目录，只创建 symlink。Agent 的内置 skill 完全不受影响。
 
 ### Q: 可以只同步到部分 Agent 吗？
 
-**A: 可以。** 编辑 `adapters/` 目录下不需要的 agent 配置文件，将其移除或重命名（以 `_` 开头的文件会被跳过）。
+**A: 可以。** 在 `adapters/` 目录下，将不需要的 Agent 配置文件重命名（以 `_` 开头）即可跳过。
 
 ### Q: Skill 仓库可以放在 Git 仓库中吗？
 
@@ -357,40 +208,92 @@ skill_dir: ~/.新的路径
 
 **A: 目前不支持。** SkillOnce 使用 bash 脚本和 symlink，仅支持 macOS 和 Linux。
 
-## Roadmap
+---
 
-### Phase 1: 基础功能 ✅
+## 底层原理（技术细节）
+
+> 以下内容适合想了解实现细节的用户。普通用户无需阅读。
+
+### 工作机制
+
+```
+~/.agents/.mySkillRepository/         ← 唯一真相源（你的 skill）
+├── my-skill-1/
+│   └── SKILL.md
+├── my-skill-2/
+│   └── SKILL.md
+└── ...
+
+各 Agent 通过 symlink 引用：
+~/.claude/skills/my-skill-1 → ~/.agents/.mySkillRepository/my-skill-1
+~/.cursor/skills/my-skill-1 → ~/.agents/.mySkillRepository/my-skill-1
+~/.hermes/skills/my-skill-1 → ~/.agents/.mySkillRepository/my-skill-1
+```
+
+### 核心特性
+
+| 特性 | 说明 |
+|------|------|
+| **Symlink 同步** | 基于符号链接，零副本，修改即生效 |
+| **自动检测** | 自动识别已安装的 Agent 及其 skill 规则 |
+| **内置保护** | 跳过 Agent 的原生 skill，不会造成冲突 |
+| **可配置** | skill 存储路径可自定义 |
+| **轻量级** | 纯 bash 脚本，无额外依赖 |
+| **可扩展** | 轻松添加对新 Agent 的支持 |
+
+### 项目结构
+
+```
+~/.agents/skill-once/
+├── SKILL.md                    # Agent 读取的 skill 定义
+├── config.yaml                 # 配置文件
+├── adapters/                   # Agent 适配器配置
+├── scripts/                    # 管理脚本
+└── templates/                  # Skill 模板
+```
+
+### 命令参考
+
+| 命令 | 说明 |
+|------|------|
+| `init.sh` | 初始化 SkillOnce |
+| `detect.sh` | 检测已安装的 Agent |
+| `gen-config.sh` | 生成 Agent 配置 |
+| `sync.sh` | 同步所有 skill |
+| `add.sh` | 添加新 skill |
+| `remove.sh` | 删除 skill |
+| `status.sh` | 查看部署状态 |
+
+### 添加新 Agent
+
+在 `~/.agents/skill-once/adapters/` 创建 `<agent-name>.yaml`：
+
+```yaml
+name: agent-name
+path: ~/.<agent-name>/skills
+supports_symlink: true
+builtin_paths:
+  - ~/.<agent-name>/builtin/    # 可选：内置 skill 目录
+```
+
+然后运行 `sync.sh` 即可。
+
+---
+
+## Roadmap
 
 - [x] Symlink 同步机制
 - [x] 自动检测 Agent
 - [x] 配置生成
 - [x] 内置 skill 保护
-
-### Phase 2: 增强功能
-
 - [ ] `--dry-run` 预览模式
 - [ ] `validate` 命令验证 skill 格式
 - [ ] 增量同步（基于文件哈希）
 - [ ] 多 skill 仓库支持
 
-### Phase 3: Maven 模式
-
-- [ ] `skill.yaml` 格式（类似 pom.xml）
-- [ ] 依赖管理
-- [ ] 版本控制
-- [ ] 中央仓库支持
-
 ## 贡献
 
 欢迎贡献！请参阅 [CONTRIBUTING.md](CONTRIBUTING.md)。
-
-### 开发流程
-
-1. Fork 本仓库
-2. 创建特性分支：`git checkout -b feature/amazing-feature`
-3. 提交更改：`git commit -m 'Add amazing feature'`
-4. 推送到分支：`git push origin feature/amazing-feature`
-5. 创建 Pull Request
 
 ## License
 
