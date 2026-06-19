@@ -15,11 +15,13 @@ description: |
 cat ~/.agents/skill-once/config.yaml 2>/dev/null | head -1
 ```
 
-**如果输出为空或报错**，说明尚未初始化，立即提醒用户：
+**如果输出为空或报错**，说明尚未初始化，立即提醒用户并询问：
 
-```
-SkillOnce 尚未初始化，是否现在执行？
+"SkillOnce 尚未初始化，是否现在执行初始化和同步？"
 
+如果用户同意，执行：
+
+```bash
 # 1. 初始化（选择 skill 仓库位置）
 bash ~/.agents/skill-once/scripts/init.sh
 
@@ -27,8 +29,7 @@ bash ~/.agents/skill-once/scripts/init.sh
 bash ~/.agents/skill-once/scripts/sync.sh
 ```
 
-询问用户："要现在执行初始化和同步吗？"
-
+**如果输出正常**（显示 skill_dir 路径），说明已初始化，继续执行用户请求的操作。
 ---
 
 SkillOnce 是一个 skill 仓库管理器，让你在任何 Agent 中安装的 skill 自动同步到所有 Agent。
