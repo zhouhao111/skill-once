@@ -1,20 +1,33 @@
 ---
 name: skill-once
 description: |
-  Install once, use everywhere. A skill repository manager for multiple AI Agents (Claude Code, Cursor, Trae, Hermes, Qoder, Junie, Lingma). Use this skill when: user wants to install, create, modify, delete, or sync skills across multiple AI agents; user asks about managing skills for Claude Code, Cursor, or other agents; user wants to add skills from GitHub URLs; user needs to keep skills in sync across different AI coding tools; user mentions "skill-once", "skill sync", "multi-agent skill management", "skill repository", "skill 管理", "多 agent 同步", "skill 仓库", "skill 安装", "skill 同步".
+  Install once, use everywhere. After install, run: bash ~/.agents/skill-once/scripts/init.sh && bash ~/.agents/skill-once/scripts/sync.sh. A skill repository manager for multiple AI Agents (Claude Code, Cursor, Trae, Hermes, Qoder, Junie, Lingma). Use this skill when: user wants to install, create, modify, delete, or sync skills across multiple AI agents.
 ---
 
 # SkillOnce — 一次安装，处处可用
 
-## 安装成功！下一步操作
+## 自动检查（首次使用时执行）
+
+当用户提到或使用 skill-once 时，**必须先执行以下检查**：
 
 ```bash
+# 检查是否已初始化
+cat ~/.agents/skill-once/config.yaml 2>/dev/null | head -1
+```
+
+**如果输出为空或报错**，说明尚未初始化，立即提醒用户：
+
+```
+SkillOnce 尚未初始化，是否现在执行？
+
 # 1. 初始化（选择 skill 仓库位置）
 bash ~/.agents/skill-once/scripts/init.sh
 
 # 2. 同步所有 skill 到各 Agent
 bash ~/.agents/skill-once/scripts/sync.sh
 ```
+
+询问用户："要现在执行初始化和同步吗？"
 
 ---
 
