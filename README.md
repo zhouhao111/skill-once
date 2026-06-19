@@ -184,8 +184,8 @@ skill-once add https://github.com/user/repo
 ### 从本地安装 Skill
 
 ```bash
-# 从本地目录添加
-skill-once add my-skill /path/to/my-skill
+# 从当前 Agent 添加
+skill-once add my-skill
 
 # 同步到所有 Agent
 skill-once sync
@@ -195,7 +195,7 @@ skill-once sync
 
 ```bash
 # 只推送到仓库，不同步到其他 Agent
-skill-once push my-skill /path/to/my-skill
+# 推送 skill 到仓库
 
 # 如果其他 Agent 也需要使用，执行同步
 skill-once sync
