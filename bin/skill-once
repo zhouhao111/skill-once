@@ -23,7 +23,7 @@ show_help() {
     echo ""
     echo "${CYAN}基础命令:${NC}"
     echo "  ${GREEN}init${NC}              初始化 skill 仓库"
-    echo "  ${GREEN}add${NC} <名称> <路径>  添加 skill 到仓库"
+    echo "  ${GREEN}add${NC} <名称>        添加 skill 到仓库（从当前 Agent）"
     echo "  ${GREEN}add${NC} .              添加所有 skill"
     echo "  ${GREEN}remove${NC} <名称>     从仓库删除 skill"
     echo "  ${GREEN}list${NC}              列出所有 skill"
@@ -31,7 +31,6 @@ show_help() {
     echo "${CYAN}同步命令:${NC}"
     echo "  ${GREEN}sync${NC}              同步所有 skill 到各 Agent"
     echo "  ${GREEN}pull${NC} <名称>       从仓库拉取 skill 到当前 Agent"
-    echo "  ${GREEN}push${NC} <名称> <路径> 推送 skill 到仓库"
     echo ""
     echo "${CYAN}查看命令:${NC}"
     echo "  ${GREEN}status${NC}            查看部署状态"
@@ -40,11 +39,10 @@ show_help() {
     echo ""
     echo "${CYAN}示例:${NC}"
     echo "  skill-once init                    # 初始化仓库"
-    echo "  skill-once add my-skill ./my-skill # 添加 skill"
+    echo "  skill-once add my-skill            # 把当前 Agent 的 my-skill 添加到仓库"
     echo "  skill-once add .                   # 添加所有 skill"
     echo "  skill-once sync                    # 同步到所有 Agent"
     echo "  skill-once pull my-skill           # 拉取 skill"
-    echo "  skill-once push my-skill ./my-skill # 推送到仓库"
     echo ""
     echo "更多信息请访问: https://github.com/zhouhao111/skill-once"
 }
@@ -59,7 +57,7 @@ cmd_init() {
 # 添加 skill
 cmd_add() {
     if [ -z "$1" ]; then
-        echo -e "${RED}❌ 用法: skill-once add <名称> <路径>${NC}"
+        echo -e "${RED}❌ 用法: skill-once add <名称>${NC}"
         echo "   或: skill-once add . (添加所有 skill)"
         exit 1
     fi
@@ -73,14 +71,11 @@ cmd_add() {
     fi
     
     # 添加指定 skill
-    if [ -z "$2" ]; then
-        echo -e "${RED}❌ 用法: skill-once add <名称> <路径>${NC}"
-        exit 1
-    fi
+    name="$1"
     
-    echo -e "${BLUE}📦 添加 skill: $1${NC}"
+    echo -e "${BLUE}📦 添加 skill: $name${NC}"
     echo ""
-    bash "$SKILL_ONCE/scripts/add.sh" "$1" "$2"
+    bash "$SKILL_ONCE/scripts/add.sh" "$name"
 }
 
 # 删除 skill
@@ -132,18 +127,6 @@ cmd_sync() {
     echo -e "${BLUE}🔄 同步 skill...${NC}"
     echo ""
     bash "$SKILL_ONCE/scripts/sync.sh" "$@"
-}
-
-# 推送 skill 到仓库
-cmd_push() {
-    if [ -z "$1" ] || [ -z "$2" ]; then
-        echo -e "${RED}❌ 用法: skill-once push <名称> <路径>${NC}"
-        exit 1
-    fi
-    
-    echo -e "${BLUE}📦 推送 skill 到仓库: $1${NC}"
-    echo ""
-    bash "$SKILL_ONCE/scripts/push-to-repo.sh" "$1" "$2"
 }
 
 # 拉取 skill
@@ -204,10 +187,6 @@ main() {
         sync)
             shift
             cmd_sync "$@"
-            ;;
-        push)
-            shift
-            cmd_push "$@"
             ;;
         pull)
             shift
