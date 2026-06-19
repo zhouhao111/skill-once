@@ -152,7 +152,8 @@ bash ~/.agents/skill-once/scripts/pull.sh <skill-name>
 bash ~/.agents/skill-once/scripts/sync.sh
 
 # 添加单个 skill
-bash ~/.agents/skill-once/scripts/add.sh <name> <source-path>
+# 推送 skill 到仓库（不影响其他 Agent）
+bash ~/.agents/skill-once/scripts/push-to-repo.sh <name> <source-path>bash ~/.agents/skill-once/scripts/add.sh <name> <source-path>
 
 # 删除 skill
 bash ~/.agents/skill-once/scripts/remove.sh <name>

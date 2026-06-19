@@ -22,8 +22,9 @@ show_help() {
     echo ""
     echo "命令:"
     echo "  ${GREEN}init${NC}              初始化 SkillOnce"
-    echo "  ${GREEN}add${NC} <名称> <路径>  添加新 skill"
+    echo "  ${GREEN}add${NC} <名称> <路径>  添加新 skill 并同步到所有 Agent"
     echo "  ${GREEN}add${NC} <URL>          从 GitHub 安装 skill"
+    echo "  ${GREEN}push${NC} <名称> <路径> 推送 skill 到仓库（不影响其他 Agent）"
     echo "  ${GREEN}remove${NC} <名称>     删除 skill"
     echo "  ${GREEN}sync${NC}              同步所有 skill 到各 Agent"
     echo "  ${GREEN}status${NC}            查看部署状态"
@@ -35,6 +36,7 @@ show_help() {
     echo "  skill-once init                    # 首次安装时运行"
     echo "  skill-once add my-skill ./my-skill # 从本地添加 skill"
     echo "  skill-once add https://github.com/user/repo --skill xxx  # 从 GitHub 安装"
+    echo "  skill-once push my-skill ./my-skill # 只推送到仓库"
     echo "  skill-once sync                    # 同步到所有 Agent"
     echo "  skill-once status                  # 查看状态"
     echo ""
@@ -85,6 +87,18 @@ cmd_add() {
     echo -e "${BLUE}📦 添加 skill: $1${NC}"
     echo ""
     bash "$SKILL_ONCE/scripts/add.sh" "$1" "$2"
+}
+
+# 推送 skill 到仓库
+cmd_push() {
+    if [ -z "$1" ] || [ -z "$2" ]; then
+        echo -e "${RED}❌ 用法: skill-once push <名称> <路径>${NC}"
+        exit 1
+    fi
+    
+    echo -e "${BLUE}📦 推送 skill 到仓库: $1${NC}"
+    echo ""
+    bash "$SKILL_ONCE/scripts/push-to-repo.sh" "$1" "$2"
 }
 
 # 删除 skill
@@ -161,6 +175,10 @@ main() {
         add)
             shift
             cmd_add "$@"
+            ;;
+        push)
+            shift
+            cmd_push "$@"
             ;;
         remove|rm)
             shift
