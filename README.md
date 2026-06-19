@@ -130,31 +130,15 @@ Claude Code ✅  Cursor ✅  Trae ✅  Hermes ✅  ...
 
 ## 安装
 
-### 方式 1：npx（推荐）
+### 方式 1：npx skills（推荐）
 
 ```bash
-npx skill-once init
+npx skills add zhouhao111/skill-once
 ```
 
-无需安装，直接运行。适合想尝鲜的用户。
+自动同步到所有已安装的 AI Agent。
 
-### 方式 2：bunx
-
-```bash
-bunx skill-once init
-```
-
-更快的运行速度。适合追求性能的用户。
-
-### 方式 3：pnpm
-
-```bash
-pnpm dlx skill-once init
-```
-
-节省磁盘空间。适合使用 pnpm 的用户。
-
-### 方式 4：Git Clone（传统方式）
+### 方式 2：Git Clone
 
 ```bash
 # 克隆仓库

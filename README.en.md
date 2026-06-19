@@ -83,31 +83,15 @@ Agents reference via symlinks:
 
 ## Installation
 
-### Method 1: npx (Recommended)
+### Method 1: npx skills (Recommended)
 
 ```bash
-npx skill-once init
+npx skills add zhouhao111/skill-once
 ```
 
-No installation required. Run directly. Perfect for trying it out.
+Automatically syncs to all installed AI Agents.
 
-### Method 2: bunx
-
-```bash
-bunx skill-once init
-```
-
-Faster execution speed. Perfect for performance-conscious users.
-
-### Method 3: pnpm
-
-```bash
-pnpm dlx skill-once init
-```
-
-Saves disk space. Perfect for pnpm users.
-
-### Method 4: Git Clone (Traditional)
+### Method 2: Git Clone
 
 ```bash
 # Clone the repository
