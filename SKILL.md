@@ -75,10 +75,18 @@ SkillOnce 是一个 skill 仓库管理器，让你在任何 Agent 中安装的 s
 
 ### 规则 5：删除 skill 的流程
 
-当用户要求删除 skill 时：
+**区分两种情况：**
 
-1. 删除 `<skill_dir>/<name>/` 目录
-2. 运行清理：`bash ~/.agents/skill-once/scripts/remove.sh <name>`
+**情况A：卸载 skill-once 本身**
+- 只删除当前 AI Agent 的 skill 目录下的 symlink
+- **不要**删除仓库中的 skill-once（`~/.agents/skill-once/`）
+- 命令：`rm ~/.claude/skills/skill-once`（以Claude Code为例）
+
+**情况B：卸载其他 skill**
+- 从仓库中删除：`rm -rf <skill_dir>/<name>/`
+- 运行清理：`bash ~/.agents/skill-once/scripts/remove.sh <name>`
+
+判断方法：如果 `<name>` 等于 `skill-once`，执行情况A；否则执行情况B。
 
 ### 规则 6：拉取模式（推荐）
 
