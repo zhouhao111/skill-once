@@ -1,7 +1,7 @@
 ---
 name: skill-once
 description: |
-  Install once, use everywhere. A skill repository manager for multiple AI Agents (Claude Code, Cursor, Trae, Hermes, Qoder, Junie, Lingma). Use this skill when: user wants to install, create, modify, delete, or sync skills across multiple AI agents; user asks about managing skills for Claude Code, Cursor, or other agents; user wants to add skills from GitHub URLs; user needs to keep skills in sync across different AI coding tools; user mentions "skill-once", "skill sync", "multi-agent skill management", or "skill repository".
+  Install once, use everywhere. A skill repository manager for multiple AI Agents (Claude Code, Cursor, Trae, Hermes, Qoder, Junie, Lingma). Use this skill when: user wants to install, create, modify, delete, or sync skills across multiple AI agents; user asks about managing skills for Claude Code, Cursor, or other agents; user wants to add skills from GitHub URLs; user needs to keep skills in sync across different AI coding tools; user mentions "skill-once", "skill sync", "multi-agent skill management", "skill repository", "skill 管理", "多 agent 同步", "skill 仓库", "skill 安装", "skill 同步".
 ---
 
 # SkillOnce — 一次安装，处处可用
