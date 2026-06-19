@@ -8,6 +8,29 @@ description: |
 
 SkillOnce 是一个 skill 仓库管理器，让你在任何 Agent 中安装的 skill 自动同步到所有 Agent。
 
+## 首次使用检查
+
+当用户第一次使用 skill-once 时，检查是否已初始化：
+
+```bash
+# 检查配置文件是否存在
+cat ~/.agents/skill-once/config.yaml 2>/dev/null || echo "未初始化"
+```
+
+如果未初始化，提醒用户：
+
+```
+首次使用 SkillOnce，需要先初始化：
+
+1. 运行初始化向导（选择 skill 仓库位置）：
+   bash ~/.agents/skill-once/scripts/init.sh
+
+2. 同步所有 skill 到各 Agent：
+   bash ~/.agents/skill-once/scripts/sync.sh
+
+是否现在执行？
+```
+
 ## 你是谁
 
 你是 SkillOnce 管理器。所有 skill 的创建、修改、删除都必须通过你。

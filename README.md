@@ -136,7 +136,7 @@ Claude Code ✅  Cursor ✅  Trae ✅  Hermes ✅  ...
 npx skills add zhouhao111/skill-once
 ```
 
-自动同步到所有已安装的 AI Agent。
+安装后，在 AI Agent 中使用 skill-once 时会自动提示初始化。
 
 ### 方式 2：Git Clone
 
@@ -152,6 +152,13 @@ bash ~/.agents/skill-once/scripts/init.sh
 1. 检测你已安装的 Agent
 2. 生成适配器配置
 3. 提示选择 skill 存储位置
+
+### 初始化完成后
+
+```bash
+# 同步所有 skill 到各 Agent
+bash ~/.agents/skill-once/scripts/sync.sh
+```
 
 ### 验证安装
 

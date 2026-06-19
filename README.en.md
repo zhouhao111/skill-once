@@ -89,7 +89,7 @@ Agents reference via symlinks:
 npx skills add zhouhao111/skill-once
 ```
 
-Automatically syncs to all installed AI Agents.
+After installation, you'll be prompted to initialize when using skill-once in an AI Agent.
 
 ### Method 2: Git Clone
 
@@ -112,6 +112,13 @@ Please choose skill repository location:
   3) Custom path
 
 Enter option [1]: 
+```
+
+### After Initialization
+
+```bash
+# Sync all skills to all Agents
+bash ~/.agents/skill-once/scripts/sync.sh
 ```
 
 ### Verify Installation
