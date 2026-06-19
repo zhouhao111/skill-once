@@ -84,7 +84,18 @@ SkillOnce 是一个 skill 仓库管理器，让你在任何 Agent 中安装的 s
 
 **情况B：卸载其他 skill**
 - 从仓库中删除：`rm -rf <skill_dir>/<name>/`
-- 运行清理：`bash ~/.agents/skill-once/scripts/remove.sh <name>`
+- **检测断链并清理**：
+  ```bash
+  # 检测所有agent目录下的断链
+  find ~/.claude/skills ~/.cursor/skills ~/.hermes/skills ~/.trae/skills ~/.trae-cn/skills ~/.junie/skills ~/.lingma/skills ~/.qoder/skills -type l ! -exec test -e {} \; -print 2>/dev/null
+  ```
+- 发现断链后提醒用户并删除：
+  ```
+  发现断链：
+  - ~/.cursor/skills/xxx（指向不存在的文件）
+  
+  是否删除这些断链？
+  ```
 
 判断方法：如果 `<name>` 等于 `skill-once`，执行情况A；否则执行情况B。
 
@@ -106,6 +117,20 @@ SkillOnce 是一个 skill 仓库管理器，让你在任何 Agent 中安装的 s
 - 遍历 skill_dir 下所有 skill
 - 为每个 agent 目录创建 symlink
 - 已存在的跳过
+
+### 规则 8：断链检测
+
+当用户提到"断链"、"清理"、"检查skill"时，执行断链检测：
+
+```bash
+# 检测所有agent目录下的断链
+find ~/.claude/skills ~/.cursor/skills ~/.hermes/skills ~/.trae/skills ~/.trae-cn/skills ~/.junie/skills ~/.lingma/skills ~/.qoder/skills -type l ! -exec test -e {} \; -print 2>/dev/null
+```
+
+发现断链后：
+1. 列出所有断链
+2. 询问用户是否删除
+3. 用户确认后删除断链
 
 ## 可用命令
 
