@@ -4,6 +4,8 @@
 SKILL_ONCE="$HOME/.agents/skill-once"
 CONFIG="$SKILL_ONCE/config.yaml"
 DEFAULT_SKILL_DIR="$HOME/.agents/.mySkillRepository"
+LOCAL_BIN="$HOME/.local/bin"
+CLI_LINK="$LOCAL_BIN/skill-once"
 
 # 检查是否已配置
 if [ -f "$CONFIG" ]; then
@@ -11,6 +13,22 @@ if [ -f "$CONFIG" ]; then
     SKILL_DIR=$(eval echo "$SKILL_DIR")
     echo "✅ SkillOnce 已初始化"
     echo "  Skill 仓库: $SKILL_DIR"
+    
+    # 检查 CLI 链接是否存在
+    if [ ! -L "$CLI_LINK" ]; then
+        echo ""
+        echo "🔧 配置 CLI 命令..."
+        mkdir -p "$LOCAL_BIN"
+        ln -sf "$SKILL_ONCE/bin/skill-once" "$CLI_LINK"
+        echo "  ✅ 已创建符号链接: $CLI_LINK"
+        
+        # 检查是否在 PATH 中
+        if [[ ":$PATH:" != *":$LOCAL_BIN:"* ]]; then
+            echo ""
+            echo "📌 需要添加到 PATH，在 shell 配置文件中添加:"
+            echo "   export PATH=\"$LOCAL_BIN:\$PATH\""
+        fi
+    fi
     exit 0
 fi
 
@@ -51,10 +69,48 @@ if [ ! -d "$SKILL_DIR/.git" ]; then
     echo "  Skill 仓库已初始化"
 fi
 
+# 配置 CLI 命令
+echo ""
+echo "🔧 配置 CLI 命令..."
+mkdir -p "$LOCAL_BIN"
+ln -sf "$SKILL_ONCE/bin/skill-once" "$CLI_LINK"
+echo "  ✅ 已创建符号链接: $CLI_LINK"
+
+# 添加到 shell 配置文件
+SHELL_CONFIG=""
+if [ -f "$HOME/.zshrc" ]; then
+    SHELL_CONFIG="$HOME/.zshrc"
+elif [ -f "$HOME/.bashrc" ]; then
+    SHELL_CONFIG="$HOME/.bashrc"
+elif [ -f "$HOME/.bash_profile" ]; then
+    SHELL_CONFIG="$HOME/.bash_profile"
+fi
+
+if [ -n "$SHELL_CONFIG" ]; then
+    if ! grep -q "$LOCAL_BIN" "$SHELL_CONFIG" 2>/dev/null; then
+        echo "" >> "$SHELL_CONFIG"
+        echo "# SkillOnce CLI" >> "$SHELL_CONFIG"
+        echo "export PATH=\"$LOCAL_BIN:\$PATH\"" >> "$SHELL_CONFIG"
+        echo "  ✅ 已添加到 $SHELL_CONFIG"
+    else
+        echo "  ℹ️  已存在于 $SHELL_CONFIG"
+    fi
+else
+    echo "  ⚠️  未找到 shell 配置文件，请手动添加:"
+    echo "     export PATH=\"$LOCAL_BIN:\$PATH\""
+fi
+
 echo ""
 echo "✅ SkillOnce 初始化完成"
 echo "  管理工具: $SKILL_ONCE"
 echo "  Skill 仓库: $SKILL_DIR"
+echo "  CLI 命令: $CLI_LINK"
 echo ""
-echo "📌 下一步: 运行 sync 开始同步 skill"
-echo "   bash $SKILL_ONCE/scripts/sync.sh"
+echo "📌 请重新打开终端或执行以下命令使配置生效:"
+echo "   source $SHELL_CONFIG"
+echo ""
+echo "📌 然后可以直接使用 skill-once 命令:"
+echo "   skill-once sync    # 同步 skill"
+echo "   skill-once list    # 列出 skill"
+echo "   skill-once status  # 查看状态"
+echo "   skill-once help    # 查看帮助"
