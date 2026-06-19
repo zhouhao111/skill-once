@@ -31,15 +31,7 @@ show_help() {
     echo "${CYAN}同步命令:${NC}"
     echo "  ${GREEN}sync${NC}              同步所有 skill 到各 Agent"
     echo "  ${GREEN}pull${NC} <名称>       从仓库拉取 skill 到当前 Agent"
-    echo "  ${GREEN}push${NC} <名称>       推送 skill 到仓库"
-    echo ""
-    echo "${CYAN}远程命令:${NC}"
-    echo "  ${GREEN}remote${NC} add <名称> <URL>  添加远程仓库"
-    echo "  ${GREEN}remote${NC} remove <名称>     删除远程仓库"
-    echo "  ${GREEN}remote${NC} list              列出远程仓库"
-    echo "  ${GREEN}fetch${NC}                     从远程仓库获取更新"
-    echo "  ${GREEN}pull${NC} origin               从远程仓库拉取"
-    echo "  ${GREEN}push${NC} origin               推送到远程仓库"
+    echo "  ${GREEN}push${NC} <名称> <路径> 推送 skill 到仓库"
     echo ""
     echo "${CYAN}查看命令:${NC}"
     echo "  ${GREEN}status${NC}            查看部署状态"
@@ -52,8 +44,7 @@ show_help() {
     echo "  skill-once add .                   # 添加所有 skill"
     echo "  skill-once sync                    # 同步到所有 Agent"
     echo "  skill-once pull my-skill           # 拉取 skill"
-    echo "  skill-once remote add origin https://github.com/user/repo.git"
-    echo "  skill-once push origin             # 推送到远程"
+    echo "  skill-once push my-skill ./my-skill # 推送到仓库"
     echo ""
     echo "更多信息请访问: https://github.com/zhouhao111/skill-once"
 }
@@ -145,22 +136,7 @@ cmd_sync() {
 
 # 推送 skill 到仓库
 cmd_push() {
-    if [ -z "$1" ]; then
-        echo -e "${RED}❌ 用法: skill-once push <名称> <路径>${NC}"
-        echo "   或: skill-once push origin (推送到远程仓库)"
-        exit 1
-    fi
-    
-    # 推送到远程仓库
-    if [ "$1" = "origin" ] || [ "$1" = "github" ] || [ "$1" = "gitee" ]; then
-        echo -e "${BLUE}📤 推送到远程仓库: $1${NC}"
-        echo ""
-        bash "$SKILL_ONCE/scripts/push-remote.sh" "$1"
-        return
-    fi
-    
-    # 推送 skill 到仓库
-    if [ -z "$2" ]; then
+    if [ -z "$1" ] || [ -z "$2" ]; then
         echo -e "${RED}❌ 用法: skill-once push <名称> <路径>${NC}"
         exit 1
     fi
@@ -174,69 +150,12 @@ cmd_push() {
 cmd_pull() {
     if [ -z "$1" ]; then
         echo -e "${RED}❌ 用法: skill-once pull <名称>${NC}"
-        echo "   或: skill-once pull origin (从远程仓库拉取)"
         exit 1
     fi
     
-    # 从远程仓库拉取
-    if [ "$1" = "origin" ] || [ "$1" = "github" ] || [ "$1" = "gitee" ]; then
-        echo -e "${BLUE}📥 从远程仓库拉取: $1${NC}"
-        echo ""
-        bash "$SKILL_ONCE/scripts/pull-remote.sh" "$1"
-        return
-    fi
-    
-    # 从仓库拉取 skill
     echo -e "${BLUE}📥 拉取 skill: $1${NC}"
     echo ""
     bash "$SKILL_ONCE/scripts/pull.sh" "$1"
-}
-
-# 远程仓库管理
-cmd_remote() {
-    if [ -z "$1" ]; then
-        echo -e "${RED}❌ 用法: skill-once remote <add|remove|list>${NC}"
-        exit 1
-    fi
-    
-    case "$1" in
-        add)
-            if [ -z "$2" ] || [ -z "$3" ]; then
-                echo -e "${RED}❌ 用法: skill-once remote add <名称> <URL>${NC}"
-                exit 1
-            fi
-            echo -e "${BLUE}🔗 添加远程仓库: $2${NC}"
-            echo ""
-            bash "$SKILL_ONCE/scripts/remote-add.sh" "$2" "$3"
-            ;;
-        remove|rm)
-            if [ -z "$2" ]; then
-                echo -e "${RED}❌ 用法: skill-once remote remove <名称>${NC}"
-                exit 1
-            fi
-            echo -e "${YELLOW}🗑️  删除远程仓库: $2${NC}"
-            echo ""
-            bash "$SKILL_ONCE/scripts/remote-remove.sh" "$2"
-            ;;
-        list|ls)
-            echo -e "${BLUE}🔗 远程仓库列表${NC}"
-            echo ""
-            bash "$SKILL_ONCE/scripts/remote-list.sh"
-            ;;
-        *)
-            echo -e "${RED}❌ 未知命令: $1${NC}"
-            echo ""
-            echo "用法: skill-once remote <add|remove|list>"
-            exit 1
-            ;;
-    esac
-}
-
-# 从远程仓库获取更新
-cmd_fetch() {
-    echo -e "${BLUE}📥 从远程仓库获取更新...${NC}"
-    echo ""
-    bash "$SKILL_ONCE/scripts/fetch.sh"
 }
 
 # 查看状态
@@ -293,13 +212,6 @@ main() {
         pull)
             shift
             cmd_pull "$@"
-            ;;
-        remote)
-            shift
-            cmd_remote "$@"
-            ;;
-        fetch)
-            cmd_fetch
             ;;
         status|st)
             cmd_status

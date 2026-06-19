@@ -32,18 +32,7 @@ skill-once add my-skill ./my-skill # Add skill
 skill-once add .                   # Add all skills
 skill-once sync                    # Sync to all Agents
 skill-once pull my-skill           # Pull skill
-skill-once push origin             # Push to remote
-```
-
-### 🌐 Remote Repository Management
-
-```bash
-skill-once remote add origin https://github.com/user/repo.git
-skill-once remote add gitee https://gitee.com/user/repo.git
-skill-once remote list
-skill-once fetch
-skill-once pull origin
-skill-once push origin
+skill-once push my-skill ./my-skill # Push to repository
 ```
 
 ### 📊 Status Viewing
@@ -212,19 +201,6 @@ skill-once push my-skill /path/to/my-skill
 skill-once sync
 ```
 
-### Sync from Remote Repository
-
-```bash
-# Add remote repository
-skill-once remote add origin https://github.com/user/repo.git
-
-# Pull from remote
-skill-once pull origin
-
-# Push to remote
-skill-once push origin
-```
-
 ### Delete Skill
 
 ```bash
@@ -258,17 +234,6 @@ skill-once status
 | `skill-once sync` | Sync all skills to all Agents |
 | `skill-once pull <name>` | Pull skill to current Agent |
 | `skill-once push <name> <path>` | Push skill to repository |
-
-### Remote Commands
-
-| Command | Description |
-|---------|-------------|
-| `skill-once remote add <name> <URL>` | Add remote repository |
-| `skill-once remote remove <name>` | Remove remote repository |
-| `skill-once remote list` | List remote repositories |
-| `skill-once fetch` | Fetch from remote repositories |
-| `skill-once pull origin` | Pull from remote |
-| `skill-once push origin` | Push to remote |
 
 ### Viewing Commands
 
@@ -365,12 +330,6 @@ All Agents reference via symlink:
 │   ├── sync.sh                 # Sync skills
 │   ├── pull.sh                 # Pull skill
 │   ├── push-to-repo.sh         # Push to repository
-│   ├── push-remote.sh          # Push to remote
-│   ├── pull-remote.sh          # Pull from remote
-│   ├── remote-add.sh           # Add remote repository
-│   ├── remote-remove.sh        # Remove remote repository
-│   ├── remote-list.sh          # List remote repositories
-│   ├── fetch.sh                # Fetch from remote
 │   ├── diff.sh                 # View changes
 │   ├── log.sh                  # View history
 │   ├── status.sh               # View status
@@ -401,7 +360,6 @@ Then run `skill-once sync`.
 - [x] Configuration generation
 - [x] Built-in skill protection
 - [x] Git-style CLI commands
-- [x] Remote repository management
 - [x] Auto PATH configuration
 - [ ] `--dry-run` preview mode
 - [ ] `validate` command to verify skill format

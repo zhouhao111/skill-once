@@ -32,18 +32,7 @@ skill-once add my-skill ./my-skill # 添加 skill
 skill-once add .                   # 添加所有 skill
 skill-once sync                    # 同步到所有 Agent
 skill-once pull my-skill           # 拉取 skill
-skill-once push origin             # 推送到远程
-```
-
-### 🌐 远程仓库管理
-
-```bash
-skill-once remote add origin https://github.com/user/repo.git
-skill-once remote add gitee https://gitee.com/user/repo.git
-skill-once remote list
-skill-once fetch
-skill-once pull origin
-skill-once push origin
+skill-once push my-skill ./my-skill # 推送到仓库
 ```
 
 ### 📊 状态查看
@@ -212,19 +201,6 @@ skill-once push my-skill /path/to/my-skill
 skill-once sync
 ```
 
-### 从远程仓库同步
-
-```bash
-# 添加远程仓库
-skill-once remote add origin https://github.com/user/repo.git
-
-# 从远程拉取
-skill-once pull origin
-
-# 推送到远程
-skill-once push origin
-```
-
 ### 删除 Skill
 
 ```bash
@@ -258,17 +234,6 @@ skill-once status
 | `skill-once sync` | 同步所有 skill 到各 Agent |
 | `skill-once pull <名称>` | 从仓库拉取 skill 到当前 Agent |
 | `skill-once push <名称> <路径>` | 推送 skill 到仓库 |
-
-### 远程命令
-
-| 命令 | 说明 |
-|------|------|
-| `skill-once remote add <名称> <URL>` | 添加远程仓库 |
-| `skill-once remote remove <名称>` | 删除远程仓库 |
-| `skill-once remote list` | 列出远程仓库 |
-| `skill-once fetch` | 从远程仓库获取更新 |
-| `skill-once pull origin` | 从远程仓库拉取 |
-| `skill-once push origin` | 推送到远程仓库 |
 
 ### 查看命令
 
@@ -365,12 +330,6 @@ export PATH="$HOME/.local/bin:$PATH"
 │   ├── sync.sh                 # 同步 skill
 │   ├── pull.sh                 # 拉取 skill
 │   ├── push-to-repo.sh         # 推送到仓库
-│   ├── push-remote.sh          # 推送到远程
-│   ├── pull-remote.sh          # 从远程拉取
-│   ├── remote-add.sh           # 添加远程仓库
-│   ├── remote-remove.sh        # 删除远程仓库
-│   ├── remote-list.sh          # 列出远程仓库
-│   ├── fetch.sh                # 从远程获取
 │   ├── diff.sh                 # 查看变更
 │   ├── log.sh                  # 查看历史
 │   ├── status.sh               # 查看状态
@@ -401,7 +360,6 @@ builtin_paths:
 - [x] 配置生成
 - [x] 内置 skill 保护
 - [x] Git 风格 CLI 命令
-- [x] 远程仓库管理
 - [x] 自动配置 PATH
 - [ ] `--dry-run` 预览模式
 - [ ] `validate` 命令验证 skill 格式
